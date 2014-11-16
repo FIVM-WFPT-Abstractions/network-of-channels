@@ -57,6 +57,6 @@ public class Message implements Comparable<Message>{
 
 
     public int compareTo(Message o) {
-        return Integer.compare(this.getMessagePriority(),o.getMessagePriority());
+        return messagePriority - o.getMessagePriority();
     }
 }

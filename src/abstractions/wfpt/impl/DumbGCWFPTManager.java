@@ -10,13 +10,15 @@ import java.util.Map;
  * Created by adam.czerniejewski on 10/25/14.
  */
 public class DumbGCWFPTManager implements WfptManager {
-
+    private static final Object mapLock = new Object();
     private final Map<Long, WaitFreePairTransaction> wfptMap;
     private volatile static WfptManager wfptManagerInstance;
     private static volatile Long idCounter = 0L;
 
     private DumbGCWFPTManager() {
-        wfptMap = new HashMap<Long, WaitFreePairTransaction>();
+        synchronized (mapLock) {
+            wfptMap = new HashMap<Long, WaitFreePairTransaction>();
+        }
 //        idCounter = new AtomicLong(0);
     }
 
@@ -37,24 +39,34 @@ public class DumbGCWFPTManager implements WfptManager {
         wfpt.setReader(readerThreadName);
 //        long id = idCounter.getAndIncrement();
         long id = getNextId();
-        wfptMap.put(id, wfpt);
+        synchronized (mapLock) {
+            wfptMap.put(id, wfpt);
+        }
         return id;
     }
 
     public WaitFreePairTransaction remove(long id) {
-       return wfptMap.remove(id);
+       synchronized (mapLock) {
+           return wfptMap.remove(id);
+       }
     }
 
     public WaitFreePairTransaction getWfptReference(long id) {
-        return wfptMap.get(id);
+        synchronized (mapLock) {
+            return wfptMap.get(id);
+        }
     }
 
     public boolean wfptExists(long wfptId) {
-        return wfptMap.containsKey(wfptId);
+        synchronized (mapLock) {
+            return wfptMap.containsKey(wfptId);
+        }
     }
 
     public void addWfpt(long wfptId, ByteArrayWFPT wfpt) {
-        wfptMap.put(wfptId,wfpt);
+        synchronized (mapLock) {
+            wfptMap.put(wfptId,wfpt);
+        }
     }
 
     public long getNextId() {

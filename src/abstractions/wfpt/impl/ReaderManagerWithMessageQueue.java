@@ -5,18 +5,20 @@ import abstractions.wfpt.interfaces.ReaderManager;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by bhushan on 11/8/14.
  */
 public class ReaderManagerWithMessageQueue implements ReaderManager {
 
+    public static final Object mapObject = new Object();
     private final Map<String, PriorityQueue<Message>> readerMessagesQueueMap;
     private volatile static ReaderManager readerManagerInstance;
 
     private ReaderManagerWithMessageQueue() {
-        readerMessagesQueueMap = new HashMap<String, PriorityQueue<Message>>();
+        synchronized (mapObject) {
+            readerMessagesQueueMap = new HashMap<String, PriorityQueue<Message>>();
+        }
     }
 
     public static ReaderManager getInstance() {
@@ -32,17 +34,23 @@ public class ReaderManagerWithMessageQueue implements ReaderManager {
 
     public Message popMessage() {
         String myThreadName = Thread.currentThread().getName();
-        Message message = readerMessagesQueueMap.get(myThreadName).poll();
-
+        Message message;
+        synchronized (mapObject) {
+            message = readerMessagesQueueMap.get(myThreadName).poll();
+        }
         return message;
     }
 
     public void enqueueMessage(String threadName, Message m) {
-        readerMessagesQueueMap.get(threadName).add(m);
+        synchronized (mapObject) {
+            readerMessagesQueueMap.get(threadName).add(m);
+        }
     }
 
     public void addReader(String readerThreadName) {
         PriorityQueue<Message> messageQ = new PriorityQueue<Message>();
-        readerMessagesQueueMap.put(readerThreadName,messageQ);
+        synchronized (mapObject) {
+            readerMessagesQueueMap.put(readerThreadName, messageQ);
+        }
     }
 }
