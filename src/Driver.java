@@ -1,7 +1,8 @@
 import abstractions.wfpt.impl.DumbGCWFPTManager;
+import abstractions.wfpt.impl.ManagedWFPTCommunication;
 import abstractions.wfpt.impl.ReaderManagerWithMessageQueue;
-import abstractions.wfpt.impl.WFPTCommunication;
 import abstractions.wfpt.interfaces.ReaderManager;
+import abstractions.wfpt.interfaces.WfptCommunication;
 import abstractions.wfpt.interfaces.WfptManager;
 import com.fiji.fivm.r1.WaitFreePairTransaction;
 import com.fiji.fivm.r1.WFPTAccessException;
@@ -53,11 +54,11 @@ public class Driver {
     }
 
     private static void testWFPTAbstractions() {
-        ReaderManager readerManager = new ReaderManagerWithMessageQueue();
-        WfptManager wfptManager = new DumbGCWFPTManager();
-        WFPTCommunication wfptCommunication = new WFPTCommunication(wfptManager, readerManager);
+        ReaderManager readerManager = ReaderManagerWithMessageQueue.getInstance();
+        WfptManager wfptManager = DumbGCWFPTManager.getInstance();
+        WfptCommunication wfptCommunication = ManagedWFPTCommunication.getInstance();
 
-        if (wfptCommunication.getChannel("hello") == null) {
+        if (wfptCommunication.getChannel("hello") != null) {
             System.out.println("Abstractions Successful!");
         } else {
             System.out.println("FAILED!");

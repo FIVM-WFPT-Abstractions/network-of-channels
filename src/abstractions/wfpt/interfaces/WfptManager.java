@@ -11,11 +11,11 @@ public interface WfptManager {
      * @param threadName name of the reader thread
      * @return the id of the wfpt in the managed map
      */
-    public String createWFPT(String threadName);
+    public long createWFPT(String threadName);
 
     /**
      * removes the WFPT from the map
      * @param id of the wfpt
      */
-    public WaitFreePairTransaction remove(String id);
+    public WaitFreePairTransaction remove(long id);
 }

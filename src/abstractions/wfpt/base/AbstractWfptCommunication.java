@@ -8,9 +8,11 @@ import abstractions.wfpt.interfaces.WfptManager;
 /**
  * Created by adam.czerniejewski on 10/25/14.
  */
+@Deprecated
 public abstract class AbstractWfptCommunication {
-    protected WfptManager wfptManager;
-    protected ReaderManager readerManager;
+    private WfptManager wfptManager;
+    private ReaderManager readerManager;
+    protected static AbstractWfptCommunication instance;
 
     /**
      * returns a communication channel to the thread with name
@@ -24,4 +26,20 @@ public abstract class AbstractWfptCommunication {
      * @return
      */
     public abstract Message readNext();
+
+    public void setWfptManager(WfptManager wfptManager) {
+        this.wfptManager = wfptManager;
+    }
+
+    public void setReaderManager(ReaderManager readerManager) {
+        this.readerManager = readerManager;
+    }
+
+    public WfptManager getWfptManager() {
+        return wfptManager;
+    }
+
+    public ReaderManager getReaderManager() {
+        return readerManager;
+    }
 }

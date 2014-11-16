@@ -21,10 +21,11 @@ SOURCEFILES = src/Driver.java src/PrimitiveWFPT.java \
               src/abstractions/wfpt/impl/DumbWfptChannel.java \
               src/abstractions/wfpt/impl/Message.java \
               src/abstractions/wfpt/impl/ReaderManagerWithMessageQueue.java \
-              src/abstractions/wfpt/impl/WFPTCommunication.java \
+              src/abstractions/wfpt/impl/ManagedWFPTCommunication.java \
               src/abstractions/wfpt/interfaces/ReaderManager.java \
               src/abstractions/wfpt/interfaces/WfptChannel.java \
               src/abstractions/wfpt/interfaces/WfptManager.java \
+              src/abstractions/wfpt/interfaces/WfptCommunication.java
 
 all: wfpt-test
 

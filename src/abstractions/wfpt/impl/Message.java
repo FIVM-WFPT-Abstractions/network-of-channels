@@ -1,23 +1,28 @@
 package abstractions.wfpt.impl;
 
 import abstractions.wfpt.interfaces.WfptManager;
+import com.fiji.fivm.ThreadPriority;
 import com.fiji.fivm.r1.WaitFreePairTransaction;
+
+import java.util.Comparator;
 
 /**
  * Created by adam.czerniejewski on 10/25/14.
  */
-public class Message{
-    private WfptManager manager;
-    private WaitFreePairTransaction wfpt;
+public class Message implements Comparable<Message>{
     private String sender;
     private boolean callBackRequested;
-    private String wfptid;
+    private long wfptid;
+    private final int messagePriority;
+    private byte[] payload = null;
 
-    public Message(WfptManager manager, String sender, boolean callBackRequested, String wfptid) {
+    public Message(String sender, boolean callBackRequested, long wfptid) {
         this.sender=sender;
         this.callBackRequested=callBackRequested;
         this.wfptid=wfptid;
-        this.manager = manager;
+
+        // Right now, the message priority is same as sender priority.
+        messagePriority = Thread.currentThread().getPriority();
     }
 
 
@@ -29,13 +34,12 @@ public class Message{
 
     public byte[] getPayload() {
         if(!readAlready) {
-            ByteArrayWFPT wfpt =  (ByteArrayWFPT)manager.remove(wfptid);
+            ByteArrayWFPT wfpt =  (ByteArrayWFPT)DumbGCWFPTManager.getInstance().remove(wfptid);
             wfpt.update();
             readAlready=true;
-            return wfpt.get();
-        } else {
-            throw new IllegalStateException("The message was already Read!");
+            payload = wfpt.get();
         }
+        return payload;
     }
 
 
@@ -43,7 +47,16 @@ public class Message{
         return callBackRequested;
     }
 
-    public String getId() {
+    public long getId() {
         return wfptid;
+    }
+
+    public int getMessagePriority() {
+        return messagePriority;
+    }
+
+
+    public int compareTo(Message o) {
+        return Integer.compare(this.getMessagePriority(),o.getMessagePriority());
     }
 }
