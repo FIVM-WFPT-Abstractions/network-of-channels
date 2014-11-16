@@ -38,6 +38,7 @@ public class ManagedWFPTCommunication implements WfptCommunication {
 
     public Message readNext() {
         Message m = readerManager.popMessage();
+        //toDo null checks. Error here!
         wfptManager.remove(m.getId());
         return m;
     }

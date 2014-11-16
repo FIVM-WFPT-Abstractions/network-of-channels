@@ -21,4 +21,10 @@ public interface ReaderManager {
      */
     public void enqueueMessage(String threadName, Message m);
 
+    /**
+     * Whatever!
+     * @param readerThreadName
+     */
+    public void addReader(String readerThreadName);
+
 }

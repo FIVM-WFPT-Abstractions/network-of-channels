@@ -1,7 +1,9 @@
 import abstractions.wfpt.impl.DumbGCWFPTManager;
 import abstractions.wfpt.impl.ManagedWFPTCommunication;
+import abstractions.wfpt.impl.Message;
 import abstractions.wfpt.impl.ReaderManagerWithMessageQueue;
 import abstractions.wfpt.interfaces.ReaderManager;
+import abstractions.wfpt.interfaces.WfptChannel;
 import abstractions.wfpt.interfaces.WfptCommunication;
 import abstractions.wfpt.interfaces.WfptManager;
 import com.fiji.fivm.r1.WaitFreePairTransaction;
@@ -54,14 +56,51 @@ public class Driver {
     }
 
     private static void testWFPTAbstractions() {
-        ReaderManager readerManager = ReaderManagerWithMessageQueue.getInstance();
-        WfptManager wfptManager = DumbGCWFPTManager.getInstance();
-        WfptCommunication wfptCommunication = ManagedWFPTCommunication.getInstance();
+        Thread writer = new Thread(new Runnable() {
 
-        if (wfptCommunication.getChannel("hello") != null) {
-            System.out.println("Abstractions Successful!");
-        } else {
-            System.out.println("FAILED!");
+            public void run() {
+                System.out.println("I'm writer thread!");
+
+                WfptChannel wfptChannel = ManagedWFPTCommunication.getInstance().getChannel("reader");
+                wfptChannel.send("Hello Reader".getBytes());
+            }
+        });
+
+        Thread reader = new Thread(new Runnable() {
+
+            public void run() {
+
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("I'm reader thread");
+
+                Message incomingMsg = ManagedWFPTCommunication.getInstance().readNext();
+
+                String msg = new String(incomingMsg.getPayload());
+
+                System.out.println("Message from " + incomingMsg.getSender() +
+                        " is " +
+                        msg +
+                        " with priority " +
+                        incomingMsg.getMessagePriority());
+            }
+        });
+
+        writer.setName("Writer");
+        reader.setName("Reader");
+
+        ReaderManagerWithMessageQueue.getInstance().addReader("Reader");
+        writer.start();
+        reader.start();
+
+        try {
+            writer.join();
+            reader.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
