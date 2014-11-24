@@ -32,11 +32,14 @@ public class ReaderManagerWithMessageQueue implements ReaderManager {
         return readerManagerInstance;
     }
 
-    public Message popMessage() {
+    public Message popMessage() throws IllegalStateException{
         String myThreadName = Thread.currentThread().getName();
         Message message;
         synchronized (mapObject) {
             message = readerMessagesQueueMap.get(myThreadName).poll();
+        }
+        if(message==null) {
+            throw new IllegalStateException("No message in readers queue try again later.");
         }
         return message;
     }

@@ -1,19 +1,15 @@
-import abstractions.wfpt.impl.DumbGCWFPTManager;
 import abstractions.wfpt.impl.ManagedWFPTCommunication;
 import abstractions.wfpt.impl.Message;
 import abstractions.wfpt.impl.ReaderManagerWithMessageQueue;
-import abstractions.wfpt.interfaces.ReaderManager;
 import abstractions.wfpt.interfaces.WfptChannel;
-import abstractions.wfpt.interfaces.WfptCommunication;
-import abstractions.wfpt.interfaces.WfptManager;
-import com.fiji.fivm.r1.WaitFreePairTransaction;
-import com.fiji.fivm.r1.WFPTAccessException;
-import com.fiji.fivm.r1.MemoryAreas;
 import com.fiji.fivm.ThreadPriority;
+import com.fiji.fivm.r1.MemoryAreas;
+import com.fiji.fivm.r1.WFPTAccessException;
+import com.fiji.fivm.r1.WaitFreePairTransaction;
+import com.fiji.mvm.InterVMCommunication;
+import com.fiji.mvm.Payload;
 import com.fiji.mvm.TimeSliceManager;
 import com.fiji.mvm.VMConfiguration;
-import com.fiji.mvm.Payload;
-import com.fiji.mvm.InterVMCommunication;
 
 import java.util.HashSet;
 
@@ -56,12 +52,15 @@ public class Driver {
     }
 
     private static void testWFPTAbstractions() {
+
+
+
         Thread writer = new Thread(new Runnable() {
 
             public void run() {
                 System.out.println("I'm writer thread!");
 
-                WfptChannel wfptChannel = ManagedWFPTCommunication.getInstance().getChannel("reader");
+                WfptChannel wfptChannel = ManagedWFPTCommunication.getInstance().getChannel("Reader");
                 wfptChannel.send("Hello Reader".getBytes());
             }
         });
@@ -71,7 +70,7 @@ public class Driver {
             public void run() {
 
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(10000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

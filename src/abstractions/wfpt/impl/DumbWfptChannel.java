@@ -10,6 +10,7 @@ public class DumbWfptChannel implements WfptChannel{
     long wfptId;
     ByteArrayWFPT wfpt;
     String readerThreadName;
+    boolean alreadyAdded = false;
 
 
     public DumbWfptChannel(String readerThreadName) {
@@ -24,14 +25,15 @@ public class DumbWfptChannel implements WfptChannel{
     }
 
     public void send(byte[] payload, boolean callback) {
-        DumbGCWFPTManager gcwfptManager = (DumbGCWFPTManager)DumbGCWFPTManager.getInstance();
-        ReaderManagerWithMessageQueue readerManagerWithMessageQueue = (ReaderManagerWithMessageQueue)ReaderManagerWithMessageQueue.getInstance();
+        DumbGCWFPTManager gcwfptManager = (DumbGCWFPTManager) DumbGCWFPTManager.getInstance();
+        ReaderManagerWithMessageQueue readerManagerWithMessageQueue = (ReaderManagerWithMessageQueue) ReaderManagerWithMessageQueue.getInstance();
         wfpt.set(payload);
         wfpt.commit();
-        if(!gcwfptManager.wfptExists(wfptId)) {
+        if(!gcwfptManager.wfptExists(wfptId) || !alreadyAdded) {
             gcwfptManager.addWfpt(wfptId,wfpt);
             Message m = new Message(Thread.currentThread().getName(),callback,wfptId);
             readerManagerWithMessageQueue.enqueueMessage(readerThreadName,m);
+            alreadyAdded = true;
         }
     }
 }

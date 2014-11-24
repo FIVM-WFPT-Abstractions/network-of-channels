@@ -35,6 +35,7 @@ public class Message implements Comparable<Message>{
     public byte[] getPayload() {
         if(!readAlready) {
             ByteArrayWFPT wfpt =  (ByteArrayWFPT)DumbGCWFPTManager.getInstance().remove(wfptid);
+            System.out.println("WFPT = "+wfpt);
             wfpt.update();
             readAlready=true;
             payload = wfpt.get();

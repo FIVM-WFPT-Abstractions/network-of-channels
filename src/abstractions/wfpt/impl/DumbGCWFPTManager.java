@@ -35,9 +35,16 @@ public class DumbGCWFPTManager implements WfptManager {
 
     public long createWFPT(String readerThreadName) {
         final WaitFreePairTransaction wfpt = new ByteArrayWFPT();
-        wfpt.setWriter(Thread.currentThread().getName());
-        wfpt.setReader(readerThreadName);
-//        long id = idCounter.getAndIncrement();
+        System.out.println("Setting writer to "+Thread.currentThread().getName());
+        wfpt.setWriter(Thread.currentThread());
+        System.out.println("Setting reader to "+readerThreadName);
+        Thread[] threads = new Thread[]{};
+        Thread.enumerate(threads);
+        for(Thread t:threads) {
+            if(t.getName().equals(readerThreadName)) {
+                wfpt.setReader(t);
+            }
+        }
         long id = getNextId();
         synchronized (mapLock) {
             wfptMap.put(id, wfpt);
@@ -47,6 +54,7 @@ public class DumbGCWFPTManager implements WfptManager {
 
     public WaitFreePairTransaction remove(long id) {
        synchronized (mapLock) {
+           System.out.println("Map size is "+wfptMap.size());
            return wfptMap.remove(id);
        }
     }
