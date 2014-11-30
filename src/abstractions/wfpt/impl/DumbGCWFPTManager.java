@@ -35,16 +35,24 @@ public class DumbGCWFPTManager implements WfptManager {
 
     public long createWFPT(String readerThreadName) {
         final WaitFreePairTransaction wfpt = new ByteArrayWFPT();
-        System.out.println("Setting writer to "+Thread.currentThread().getName());
+//        System.out.println("Setting writer to " + Thread.currentThread().getName());
         wfpt.setWriter(Thread.currentThread());
-        System.out.println("Setting reader to "+readerThreadName);
-        Thread[] threads = new Thread[]{};
+//        System.out.println("Setting reader to "+readerThreadName);
+        Thread[] threads = new Thread[Thread.activeCount()];
         Thread.enumerate(threads);
+//        System.out.println("Reader thread name is "+ readerThreadName);
+//        System.out.println("Currently active threads : "+ Thread.activeCount() + "Thread Array count : " + threads.length);
+
+        StringBuilder threadsString = new StringBuilder();
+        threadsString.append("Thread is : " + Thread.currentThread().getName() + " ");
         for(Thread t:threads) {
             if(t.getName().equals(readerThreadName)) {
+                threadsString.append("----- Setting thread + " + t.getName() + " as reader");
+//                System.out.print("Setting thread + " + t.getName() + " as reader");
                 wfpt.setReader(t);
             }
         }
+//        System.out.println(threadsString);
         long id = getNextId();
         synchronized (mapLock) {
             wfptMap.put(id, wfpt);
@@ -54,7 +62,7 @@ public class DumbGCWFPTManager implements WfptManager {
 
     public WaitFreePairTransaction remove(long id) {
        synchronized (mapLock) {
-           System.out.println("Map size is "+wfptMap.size());
+//           System.out.println("Map size is "+wfptMap.size());
            return wfptMap.remove(id);
        }
     }

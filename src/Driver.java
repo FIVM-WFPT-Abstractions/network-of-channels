@@ -11,14 +11,20 @@ import com.fiji.mvm.Payload;
 import com.fiji.mvm.TimeSliceManager;
 import com.fiji.mvm.VMConfiguration;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 public class Driver {
     public static void main(String[] args) {
 	String test = "allocate";
+    int sleepTimeSec = 0;
 	if (args.length == 1) {
 	    test = args[0];
-	}
+	} else if (args.length == 2) {
+        test = args[0];
+        sleepTimeSec = Integer.parseInt(args[1]);
+    }
 
 	if (test.equals("allocate")) {
 	    allocateWFPT();
@@ -43,7 +49,11 @@ public class Driver {
 	} else if (test.equals("ipwfptinit")) {
 	    ipwfptInit();
 	} else if (test.equals("wfptabstractions")) {
-        testWFPTAbstractions();
+        testWFPTAbstractions(sleepTimeSec);
+    } else if (test.equals("wfptabstractionssleep")) {
+        testWFPTAbstractions(sleepTimeSec);
+    } else if (test.equals("wfptabstractionsnthreads")) {
+        testWFPTAbstrationsNThreads(sleepTimeSec);
     }
     else {
 	    System.out.println("Unknown test "+test);
@@ -51,9 +61,84 @@ public class Driver {
 	}
     }
 
-    private static void testWFPTAbstractions() {
+    private static void testWFPTAbstrationsNThreads(final int numOfThreads) {
 
+        List<Thread> threadList = new ArrayList<Thread>();
 
+        for (int num=0; num < numOfThreads; num++) {
+
+            Thread thread = new Thread(new Runnable() {
+
+                public void run() {
+
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    while (true) {
+
+//                        System.out.println("My name is " + Thread.currentThread().getName());
+                        try {
+                            /**
+                             * Sleep between 0 and 400 milliseconds.
+                             */
+                            Thread.sleep((System.currentTimeMillis()%5 * 100) + 1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        String randomReader = Thread.currentThread().getName();
+                        while (randomReader.equals(Thread.currentThread().getName())) {
+                            randomReader = "Thread" + System.currentTimeMillis()%numOfThreads;
+                        }
+
+                        WfptChannel wfptChannel = ManagedWFPTCommunication.getInstance().getChannel(randomReader);
+                        String message = "Hello reader "+randomReader+". I am "+ Thread.currentThread().getName();
+                        wfptChannel.send(message.getBytes());
+
+                        while (true) {
+
+                            Message incomingMsg = null;
+                            try {
+                                incomingMsg = ManagedWFPTCommunication.getInstance().readNext();
+                            } catch (IllegalStateException e) {
+                                System.out.println(e.getMessage());
+                                break;
+                            }
+
+                            String msg = new String(incomingMsg.getPayload());
+
+                            System.out.println("Message from " + incomingMsg.getSender() +
+                                    " is ***" +
+                                    msg +
+                                    "*** with priority " +
+                                    incomingMsg.getMessagePriority());
+                        }
+                    }
+                    }
+            });
+
+            thread.setName("Thread" + num);
+            thread.setPriority(num+1);
+            threadList.add(thread);
+            ReaderManagerWithMessageQueue.getInstance().addReader(thread.getName());
+        }
+
+        for (Thread thread: threadList) {
+            thread.start();
+        }
+
+        for (Thread thread: threadList) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void testWFPTAbstractions(final int sleepSeconds) {
 
         Thread writer = new Thread(new Runnable() {
 
@@ -69,12 +154,12 @@ public class Driver {
 
             public void run() {
 
+                System.out.println("I'm reader thread");
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(sleepSeconds * 1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                System.out.println("I'm reader thread");
 
                 Message incomingMsg = ManagedWFPTCommunication.getInstance().readNext();
 
@@ -93,6 +178,7 @@ public class Driver {
 
         ReaderManagerWithMessageQueue.getInstance().addReader("Reader");
         writer.start();
+
         reader.start();
 
         try {

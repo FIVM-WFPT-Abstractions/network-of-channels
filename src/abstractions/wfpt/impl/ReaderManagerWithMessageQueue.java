@@ -39,7 +39,7 @@ public class ReaderManagerWithMessageQueue implements ReaderManager {
             message = readerMessagesQueueMap.get(myThreadName).poll();
         }
         if(message==null) {
-            throw new IllegalStateException("No message in readers queue try again later.");
+            throw new IllegalStateException("No message in reader" + Thread.currentThread().getName() + "'s queue try again later.");
         }
         return message;
     }

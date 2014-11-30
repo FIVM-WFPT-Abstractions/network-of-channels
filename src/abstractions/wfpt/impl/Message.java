@@ -1,11 +1,5 @@
 package abstractions.wfpt.impl;
 
-import abstractions.wfpt.interfaces.WfptManager;
-import com.fiji.fivm.ThreadPriority;
-import com.fiji.fivm.r1.WaitFreePairTransaction;
-
-import java.util.Comparator;
-
 /**
  * Created by adam.czerniejewski on 10/25/14.
  */
@@ -35,7 +29,7 @@ public class Message implements Comparable<Message>{
     public byte[] getPayload() {
         if(!readAlready) {
             ByteArrayWFPT wfpt =  (ByteArrayWFPT)DumbGCWFPTManager.getInstance().remove(wfptid);
-            System.out.println("WFPT = "+wfpt);
+//            System.out.println("WFPT = "+wfpt);
             wfpt.update();
             readAlready=true;
             payload = wfpt.get();

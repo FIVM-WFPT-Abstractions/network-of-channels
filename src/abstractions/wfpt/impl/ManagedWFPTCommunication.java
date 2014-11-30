@@ -39,7 +39,8 @@ public class ManagedWFPTCommunication implements WfptCommunication {
     public Message readNext() {
         Message m;
         m= readerManager.popMessage();
-        wfptManager.remove(m.getId());
+        // Remove was being called twice. Here and in ByteWFPTwhatever.java
+        // wfptManager.remove(m.getId());
         return m;
     }
 }

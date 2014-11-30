@@ -1,6 +1,7 @@
 package abstractions.wfpt.impl;
 
 import abstractions.wfpt.interfaces.WfptChannel;
+import com.fiji.fivm.r1.WFPTAccessException;
 
 
 /**
@@ -27,7 +28,12 @@ public class DumbWfptChannel implements WfptChannel{
     public void send(byte[] payload, boolean callback) {
         DumbGCWFPTManager gcwfptManager = (DumbGCWFPTManager) DumbGCWFPTManager.getInstance();
         ReaderManagerWithMessageQueue readerManagerWithMessageQueue = (ReaderManagerWithMessageQueue) ReaderManagerWithMessageQueue.getInstance();
-        wfpt.set(payload);
+        try {
+            wfpt.set(payload);
+        } catch (WFPTAccessException e) {
+            System.out.println("\nWriter is + " + wfpt.writer + "\n");
+            System.out.println("Current thread is + " + Thread.currentThread() + "\n");
+        }
         wfpt.commit();
         if(!gcwfptManager.wfptExists(wfptId) || !alreadyAdded) {
             gcwfptManager.addWfpt(wfptId,wfpt);
