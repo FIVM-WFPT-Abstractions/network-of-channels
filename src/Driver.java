@@ -72,7 +72,7 @@ public class Driver {
                 public void run() {
 
                     try {
-                        Thread.sleep(5000);
+                        Thread.sleep(3000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -120,7 +120,7 @@ public class Driver {
             });
 
             thread.setName("Thread" + num);
-            thread.setPriority(num+1);
+            thread.setPriority(num%10 + 1);
             threadList.add(thread);
             ReaderManagerWithMessageQueue.getInstance().addReader(thread.getName());
         }

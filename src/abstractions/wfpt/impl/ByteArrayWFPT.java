@@ -1,7 +1,6 @@
 package abstractions.wfpt.impl;
 
 import com.fiji.fivm.r1.WaitFreePairTransaction;
-import com.fiji.fivm.r1.arrays.ObjectArr;
 
 /**
  * Created by adam.czerniejewski on 10/25/14.
@@ -24,9 +23,9 @@ public class ByteArrayWFPT extends WaitFreePairTransaction{
     }
 
     public ByteArrayWFPT() {
-        synchronized (lockObject) {
+        /*synchronized (lockObject) {
             System.out.println("\n\nAllocating a new WFPT [WFPT No " + numWFPTs++ + "]\n\n");
-        }
+        }*/
         value = null;
     }
 
