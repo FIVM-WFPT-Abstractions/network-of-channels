@@ -54,11 +54,68 @@ public class Driver {
         testWFPTAbstractions(sleepTimeSec);
     } else if (test.equals("wfptabstractionsnthreads")) {
         testWFPTAbstrationsNThreads(sleepTimeSec);
+    } else if (test.equals("wfptabstractionsquantitative")) {
+        testWFPTAbstrationsQunatitiative(sleepTimeSec);
     }
     else {
 	    System.out.println("Unknown test "+test);
 	    System.exit(1);
 	}
+    }
+
+    private static void testWFPTAbstrationsQunatitiative(final int numOfThreads) {
+        List<Thread> threadList = new ArrayList<Thread>();
+
+        for (int num=0; num < numOfThreads; num++) {
+
+            Thread thread = new Thread(new Runnable() {
+                public void run() {
+
+                    String temp = Thread.currentThread().getName();
+                    int nextThread = Integer.parseInt(temp.replace("Thread", "")) + 1;
+                    String nextReader = "Thread" + nextThread;
+                    if(nextThread == 1){
+                        // first thread
+                        WfptChannel wfptChannel = ManagedWFPTCommunication.getInstance().getChannel(nextReader);
+                        wfptChannel.send((System.nanoTime()+"").getBytes());
+                    }
+                    else {
+                        Message incomingMsg = null;
+                        try {
+                            while(incomingMsg==null)
+                                incomingMsg = ManagedWFPTCommunication.getInstance().readNext();
+                        } catch (IllegalStateException e) {
+                            System.out.println(e.getMessage());
+                        }
+                        if (nextThread < numOfThreads) { //middle passer threads
+                            WfptChannel wfptChannel = ManagedWFPTCommunication.getInstance().getChannel(nextReader);
+                            wfptChannel.send(incomingMsg.getPayload());
+                        } else {
+                            //This is the last thread
+                            long gotit = System.nanoTime();
+                            System.out.print("The message chain took "+(gotit - Long.parseLong(new String(incomingMsg.getPayload()))));
+                        }
+                    }
+                }
+            });
+
+            thread.setName("Thread" + num);
+            thread.setPriority(1);
+            threadList.add(thread);
+            ReaderManagerWithMessageQueue.getInstance().addReader(thread.getName());
+        }
+
+        for (Thread thread: threadList) {
+            thread.start();
+        }
+
+        for (Thread thread: threadList) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private static void testWFPTAbstrationsNThreads(final int numOfThreads) {
