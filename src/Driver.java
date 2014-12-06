@@ -80,8 +80,14 @@ public class Driver {
                         wfptChannel.send((System.nanoTime()+"").getBytes());
                     }
                     else {
-                        Message incomingMsg = pollForMessage();
-
+                        Message incomingMsg = null;
+                        while(incomingMsg==null) {
+                            try {
+                                incomingMsg = ManagedWFPTCommunication.getInstance().readNext();
+                            } catch (IllegalStateException e) {
+//                                System.out.println(e.getMessage());
+                            }
+                        }
                         if (nextThread < numOfThreads) { //middle passer threads
                             WfptChannel wfptChannel = ManagedWFPTCommunication.getInstance().getChannel(nextReader);
                             wfptChannel.send(incomingMsg.getPayload());
@@ -111,16 +117,6 @@ public class Driver {
                 e.printStackTrace();
             }
         }
-    }
-
-    private static Message pollForMessage() {
-        Message incomingMsg;
-        try {
-            incomingMsg = ManagedWFPTCommunication.getInstance().readNext();
-        } catch (IllegalStateException e) {
-            incomingMsg = pollForMessage();
-        }
-        return incomingMsg;
     }
 
     private static void testWFPTAbstrationsNThreads(final int numOfThreads) {
