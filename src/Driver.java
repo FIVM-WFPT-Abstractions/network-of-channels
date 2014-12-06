@@ -79,7 +79,7 @@ public class Driver {
                 }
             }
         });
-        thread1.setName("Thread" + 1);
+        thread1.setName("Thread"+0);
         thread1.setPriority(1);
         threadList.add(thread1);
 
@@ -95,7 +95,15 @@ public class Driver {
                 long start = System.nanoTime();
                 int i = 0;
                 while(i < numberOfRecieves) {
-                    while((m=ManagedWFPTCommunication.getInstance().readNext())==null);
+                    m=null;
+                    while(m==null) {
+                        try {
+                            m = ManagedWFPTCommunication.getInstance().readNext();
+                        } catch (IllegalStateException e){
+                            System.out.println(e.getMessage());
+                        }
+                    }
+                    System.out.println("Got message #"+i);
                     m.getPayload();
                     i++;
                 }
