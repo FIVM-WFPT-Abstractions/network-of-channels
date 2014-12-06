@@ -56,11 +56,113 @@ public class Driver {
         testWFPTAbstrationsNThreads(sleepTimeSec);
     } else if (test.equals("wfptabstractionsquantitative")) {
         testWFPTAbstrationsQunatitiative(sleepTimeSec);
+    } else if (test.equals("wfptabstractionsquantitativesend")) {
+        testWFPTAbstrationsQunatitiativeSend(sleepTimeSec);
+    } else if (test.equals("wfptabstractionsquantitativerecieve")) {
+        testWFPTAbstrationsQunatitiativeRecieve(sleepTimeSec);
     }
     else {
 	    System.out.println("Unknown test "+test);
 	    System.exit(1);
 	}
+    }
+
+    private static void testWFPTAbstrationsQunatitiativeRecieve(final int numberOfRecieves) {
+        List<Thread> threadList = new ArrayList<Thread>();
+
+        Thread thread1 = new Thread(new Runnable() {
+            public void run() {
+                String nextReader = "Thread1";
+                WfptChannel wfptChannel = ManagedWFPTCommunication.getInstance().getChannel(nextReader);
+                while(true) {
+                    wfptChannel.send(("message" + "i").getBytes());
+                }
+            }
+        });
+        thread1.setName("Thread" + 1);
+        thread1.setPriority(1);
+        threadList.add(thread1);
+
+        Thread thread2 = new Thread(new Runnable() {
+            public void run() {
+                Message m = null;
+                while(m==null) {
+                    try {
+                        m = ManagedWFPTCommunication.getInstance().readNext();
+                    } catch (IllegalStateException e) {
+                    }
+                }
+                long start = System.nanoTime();
+                int i = 0;
+                while(i < numberOfRecieves) {
+                    while((m=ManagedWFPTCommunication.getInstance().readNext())==null);
+                    m.getPayload();
+                    i++;
+                }
+                System.out.println(numberOfRecieves+" messages recieved in "+(System.nanoTime()-start)+" ns.");
+                System.exit(1);
+            }
+        });
+        thread2.setName("Thread" + 1);
+        thread2.setPriority(1);
+        threadList.add(thread2);
+        ReaderManagerWithMessageQueue.getInstance().addReader(thread2.getName());
+
+        for (Thread thread: threadList) {
+            thread.start();
+        }
+
+        for (Thread thread: threadList) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void testWFPTAbstrationsQunatitiativeSend(final int numberOfSends) {
+        List<Thread> threadList = new ArrayList<Thread>();
+
+            Thread thread1 = new Thread(new Runnable() {
+                public void run() {
+                    String temp = Thread.currentThread().getName();
+                    int nextThread = Integer.parseInt(temp.replace("Thread", "")) + 1;
+                    String nextReader = "Thread" + nextThread;
+                    WfptChannel wfptChannel = ManagedWFPTCommunication.getInstance().getChannel(nextReader);
+                    long start = System.nanoTime();
+                    for(int i = 0; i<numberOfSends; i++) {
+                        wfptChannel.send(("message" + "i").getBytes());
+                    }
+                    System.out.println(numberOfSends+" messages sent in "+(System.nanoTime()-start)+" ns.");
+                    System.exit(1);
+                }
+            });
+            thread1.setName("Thread" + 0);
+            thread1.setPriority(1);
+            threadList.add(thread1);
+
+        Thread thread2 = new Thread(new Runnable() {
+            public void run() {
+                while(true);
+            }
+        });
+        thread2.setName("Thread" + 1);
+        thread2.setPriority(1);
+        threadList.add(thread2);
+        ReaderManagerWithMessageQueue.getInstance().addReader(thread2.getName());
+
+        for (Thread thread: threadList) {
+            thread.start();
+        }
+
+        for (Thread thread: threadList) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private static void testWFPTAbstrationsQunatitiative(final int numOfThreads) {
