@@ -10,7 +10,7 @@ import java.util.Map;
  * Created by adam.czerniejewski on 10/25/14.
  */
 public class DumbGCWFPTManager implements WfptManager {
-    private static volatile Object mapLock = new Object();
+    private static final Object mapLock = new Object();
     private final Map<Long, WaitFreePairTransaction> wfptMap;
     private volatile static WfptManager wfptManagerInstance;
     private static volatile Long idCounter = 0L;
