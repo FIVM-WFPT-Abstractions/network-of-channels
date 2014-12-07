@@ -146,8 +146,11 @@ public class Driver {
                     String nextReader = "Thread" + nextThread;
                     WfptChannel wfptChannel = ManagedWFPTCommunication.getInstance().getChannel(nextReader);
                     long start = System.nanoTime();
-                    for(int i = 0; i<numberOfSends; i++) {
+                    int i = 0;
+
+                    while(i<numberOfSends) {
                         wfptChannel.send(("message" + "i").getBytes());
+                        i++;
                     }
                     System.out.println(numberOfSends+" messages sent in "+(System.nanoTime()-start)+" ns.");
                     System.exit(1);
@@ -159,7 +162,13 @@ public class Driver {
 
         Thread thread2 = new Thread(new Runnable() {
             public void run() {
-                while(true);
+                while(true){
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
         thread2.setName("Thread" + 1);
