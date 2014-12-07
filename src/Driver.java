@@ -72,10 +72,16 @@ public class Driver {
 
         Thread thread1 = new Thread(new Runnable() {
             public void run() {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 String nextReader = "Thread1";
                 WfptChannel wfptChannel = ManagedWFPTCommunication.getInstance().getChannel(nextReader);
                 while(true) {
-                    wfptChannel.send(("message" + "i").getBytes());
+//                    System.out.println("Sending message to "+nextReader);
+                    wfptChannel.send(("message").getBytes());
                 }
             }
         });
@@ -100,10 +106,10 @@ public class Driver {
                         try {
                             m = ManagedWFPTCommunication.getInstance().readNext();
                         } catch (IllegalStateException e){
-                            System.out.println(e.getMessage());
+//                            System.out.println(e.getMessage());
                         }
                     }
-                    System.out.println("Got message #"+i);
+                    System.out.println("Got message #" + i);
                     m.getPayload();
                     i++;
                 }

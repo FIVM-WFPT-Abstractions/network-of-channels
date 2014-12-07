@@ -10,7 +10,7 @@ import java.util.Map;
  * Created by adam.czerniejewski on 10/25/14.
  */
 public class DumbGCWFPTManager implements WfptManager {
-    private static final Object mapLock = new Object();
+    private static volatile Object mapLock = new Object();
     private final Map<Long, WaitFreePairTransaction> wfptMap;
     private volatile static WfptManager wfptManagerInstance;
     private static volatile Long idCounter = 0L;
@@ -62,8 +62,10 @@ public class DumbGCWFPTManager implements WfptManager {
 
     public WaitFreePairTransaction remove(long id) {
        synchronized (mapLock) {
-//           System.out.println("Map size is "+wfptMap.size());
-           return wfptMap.remove(id);
+           System.out.println("Map size before remove is "+wfptMap.size());
+           WaitFreePairTransaction ret = wfptMap.remove(id);
+           System.out.println("Map size after remove is "+wfptMap.size());
+           return ret;
        }
     }
 
@@ -75,12 +77,14 @@ public class DumbGCWFPTManager implements WfptManager {
 
     public boolean wfptExists(long wfptId) {
         synchronized (mapLock) {
+            System.out.println("Checking if wfpt #"+wfptId+"exists. Map size is +"+wfptMap.size());
             return wfptMap.containsKey(wfptId);
         }
     }
 
     public void addWfpt(long wfptId, ByteArrayWFPT wfpt) {
         synchronized (mapLock) {
+            System.out.println("Adding Wfpt #"+wfptId+" to the wfptMap");
             wfptMap.put(wfptId,wfpt);
         }
     }
