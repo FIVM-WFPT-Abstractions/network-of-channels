@@ -95,6 +95,7 @@ public class Driver {
                 while(m==null) {
                     try {
                         m = ManagedWFPTCommunication.getInstance().readNext();
+                        m.getPayload();
                     } catch (IllegalStateException e) {
                     }
                 }

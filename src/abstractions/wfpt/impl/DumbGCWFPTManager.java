@@ -77,7 +77,8 @@ public class DumbGCWFPTManager implements WfptManager {
 
     public boolean wfptExists(long wfptId) {
         synchronized (mapLock) {
-            System.out.println("Checking if wfpt #"+wfptId+"exists. Map size is +"+wfptMap.size());
+            System.out.println("Checking if wfpt #"+wfptId+"exists. Map size is "+wfptMap.size()+"\nMap contains="+wfptMap.containsKey(wfptId)
+            );
             return wfptMap.containsKey(wfptId);
         }
     }
