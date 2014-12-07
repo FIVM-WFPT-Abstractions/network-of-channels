@@ -41,16 +41,16 @@ public class ReaderManagerWithMessageQueue implements ReaderManager {
         if(message==null) {
             throw new IllegalStateException("No message in reader" + Thread.currentThread().getName() + "'s queue try again later.");
         }
-        else {
-            System.out.println("We read a message!");
-        }
+//        else {
+//            System.out.println("We read a message!");
+//        }
         return message;
     }
 
     public void enqueueMessage(String threadName, Message m) {
         synchronized (mapObject) {
             readerMessagesQueueMap.get(threadName).add(m);
-            System.out.println("Reader manager enque message to thread "+threadName);
+//            System.out.println("Reader manager enque message to thread "+threadName);
         }
     }
 

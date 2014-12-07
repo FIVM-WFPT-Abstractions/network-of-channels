@@ -62,9 +62,9 @@ public class DumbGCWFPTManager implements WfptManager {
 
     public WaitFreePairTransaction remove(long id) {
        synchronized (mapLock) {
-           System.out.println("Map size before remove is "+wfptMap.size());
+//           System.out.println("Map size before remove is "+wfptMap.size());
            WaitFreePairTransaction ret = wfptMap.remove(id);
-           System.out.println("Map size after remove is "+wfptMap.size());
+//           System.out.println("Map size after remove is "+wfptMap.size());
            return ret;
        }
     }
@@ -77,15 +77,15 @@ public class DumbGCWFPTManager implements WfptManager {
 
     public boolean wfptExists(long wfptId) {
         synchronized (mapLock) {
-            System.out.println("Checking if wfpt #"+wfptId+"exists. Map size is "+wfptMap.size()+"\nMap contains="+wfptMap.containsKey(wfptId)
-            );
+//            System.out.println("Checking if wfpt #"+wfptId+"exists. Map size is "+wfptMap.size()+"\nMap contains="+wfptMap.containsKey(wfptId)
+//            );
             return wfptMap.containsKey(wfptId);
         }
     }
 
     public void addWfpt(long wfptId, ByteArrayWFPT wfpt) {
         synchronized (mapLock) {
-            System.out.println("Adding Wfpt #"+wfptId+" to the wfptMap");
+//            System.out.println("Adding Wfpt #"+wfptId+" to the wfptMap");
             wfptMap.put(wfptId,wfpt);
         }
     }
