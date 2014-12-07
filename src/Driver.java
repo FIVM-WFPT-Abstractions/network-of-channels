@@ -26,6 +26,8 @@ public class Driver {
         sleepTimeSec = Integer.parseInt(args[1]);
     }
 
+    Thread.currentThread().setName("Driver");
+
 	if (test.equals("allocate")) {
 	    allocateWFPT();
 	} else if (test.equals("bindwriter")) {
@@ -60,6 +62,8 @@ public class Driver {
         testWFPTAbstrationsQunatitiativeSend(sleepTimeSec);
     } else if (test.equals("wfptabstractionsquantitativerecieve")) {
         testWFPTAbstrationsQunatitiativeRecieve(sleepTimeSec);
+    } else if (test.equals("wfptabstractionsCSV")) {
+        testWFPTAbstrationsCollection();
     }
     else {
 	    System.out.println("Unknown test "+test);
@@ -67,16 +71,18 @@ public class Driver {
 	}
     }
 
+    private static void testWFPTAbstrationsCollection() {
+        System.out.println("Threads,nanoRunTime");
+        for(int i=2;i<=100;i++) {
+            testWFPTAbstrationsQunatitiative(i);
+        }
+    }
+
     private static void testWFPTAbstrationsQunatitiativeRecieve(final int numberOfRecieves) {
         List<Thread> threadList = new ArrayList<Thread>();
 
         Thread thread1 = new Thread(new Runnable() {
             public void run() {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
                 String nextReader = "Thread1";
                 WfptChannel wfptChannel = ManagedWFPTCommunication.getInstance().getChannel(nextReader);
                 while(true) {
@@ -88,6 +94,35 @@ public class Driver {
         thread1.setName("Thread"+0);
         thread1.setPriority(1);
         threadList.add(thread1);
+
+        Thread thread3 = new Thread(new Runnable() {
+            public void run() {
+                String nextReader = "Thread1";
+                WfptChannel wfptChannel = ManagedWFPTCommunication.getInstance().getChannel(nextReader);
+                while(true) {
+//                    System.out.println("Sending message to "+nextReader);
+                    wfptChannel.send(("message").getBytes());
+                }
+            }
+        });
+        thread3.setName("Thread"+2);
+        thread3.setPriority(1);
+        threadList.add(thread3);
+
+        Thread thread4 = new Thread(new Runnable() {
+            public void run() {
+                String nextReader = "Thread1";
+                WfptChannel wfptChannel = ManagedWFPTCommunication.getInstance().getChannel(nextReader);
+                while(true) {
+//                    System.out.println("Sending message to "+nextReader);
+                    wfptChannel.send(("message").getBytes());
+                }
+            }
+        });
+        thread4.setName("Thread"+3);
+        thread4.setPriority(1);
+        threadList.add(thread4);
+
 
         Thread thread2 = new Thread(new Runnable() {
             public void run() {
@@ -191,7 +226,6 @@ public class Driver {
 
     private static void testWFPTAbstrationsQunatitiative(final int numOfThreads) {
         List<Thread> threadList = new ArrayList<Thread>();
-
         for (int num=0; num < numOfThreads; num++) {
 
             Thread thread = new Thread(new Runnable() {
@@ -220,7 +254,7 @@ public class Driver {
                         } else {
                             //This is the last thread
                             long gotit = System.nanoTime();
-                            System.out.print("The message chain took "+(gotit - Long.parseLong(new String(incomingMsg.getPayload()))));
+                            System.out.println(numOfThreads + "," + (gotit - Long.parseLong(new String(incomingMsg.getPayload()))));
                         }
                     }
                 }

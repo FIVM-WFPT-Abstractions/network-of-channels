@@ -54,10 +54,21 @@ public class ReaderManagerWithMessageQueue implements ReaderManager {
         }
     }
 
+    private static final Object readerMapLoc = new Object();
+    private static final Map<String,Thread> readerMap = new HashMap<String, Thread>();
     public void addReader(String readerThreadName) {
         PriorityQueue<Message> messageQ = new PriorityQueue<Message>();
         synchronized (mapObject) {
             readerMessagesQueueMap.put(readerThreadName, messageQ);
+        }
+        synchronized (readerMapLoc) {
+            readerMap.put(readerThreadName,Thread.currentThread());
+        }
+    }
+
+    public Thread getReaderThread(String readerThreadName) {
+        synchronized (readerMapLoc) {
+            return readerMap.get(readerThreadName);
         }
     }
 }
