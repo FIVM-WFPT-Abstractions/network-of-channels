@@ -127,6 +127,7 @@ public class Driver {
         Thread thread2 = new Thread(new Runnable() {
             public void run() {
                 Message m = null;
+                ReaderManagerWithMessageQueue.getInstance().addReader(Thread.currentThread().getName());
                 while(m==null) {
                     try {
                         m = ManagedWFPTCommunication.getInstance().readNext();
