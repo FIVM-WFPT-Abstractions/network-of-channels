@@ -1,6 +1,5 @@
 package abstractions.wfpt.impl;
 
-import abstractions.wfpt.interfaces.ReaderManager;
 import abstractions.wfpt.interfaces.WfptManager;
 import com.fiji.fivm.r1.WaitFreePairTransaction;
 
@@ -44,15 +43,15 @@ public class DumbGCWFPTManager implements WfptManager {
 //        System.out.println("Reader thread name is "+ readerThreadName);
 //        System.out.println("Currently active threads : "+ Thread.activeCount() + "Thread Array count : " + threads.length);
 
-        StringBuilder threadsString = new StringBuilder();
-        threadsString.append("Thread is : " + Thread.currentThread().getName() + " ");
+//        StringBuilder threadsString = new StringBuilder();
+//        threadsString.append("Thread is : " + Thread.currentThread().getName() + " ");
 //        for(Thread t:threads) {
 //            if(t!=null && t.getName() != null && t.getName().equals(readerThreadName)) {
 //                threadsString.append("----- Setting thread + " + t.getName() + " as reader");
 //                wfpt.setReader(t);
 //            }
 //        }
-        Thread reader = ReaderManagerWithMessageQueue.getInstance().
+        wfpt.setReader(ReaderManagerWithMessageQueue.getInstance().getReaderThread(readerThreadName));
 
 //        System.out.println(threadsString);
         long id = getNextId();

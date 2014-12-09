@@ -27,4 +27,6 @@ public interface ReaderManager {
      */
     public void addReader(String readerThreadName);
 
+    public Thread getReaderThread(String readerThreadName);
+
 }

@@ -230,12 +230,19 @@ public class Driver {
 
             Thread thread = new Thread(new Runnable() {
                 public void run() {
-
+                    // register current thread with reader manager
                     String temp = Thread.currentThread().getName();
+                    ReaderManagerWithMessageQueue.getInstance().addReader(temp);
+
                     int nextThread = Integer.parseInt(temp.replace("Thread", "")) + 1;
                     String nextReader = "Thread" + nextThread;
                     if(nextThread == 1){
                         // first thread
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                         WfptChannel wfptChannel = ManagedWFPTCommunication.getInstance().getChannel(nextReader);
                         wfptChannel.send((System.nanoTime()+"").getBytes());
                     }
@@ -263,7 +270,6 @@ public class Driver {
             thread.setName("Thread" + num);
             thread.setPriority(1);
             threadList.add(thread);
-            ReaderManagerWithMessageQueue.getInstance().addReader(thread.getName());
         }
 
         for (Thread thread: threadList) {
@@ -273,8 +279,8 @@ public class Driver {
         for (Thread thread: threadList) {
             try {
                 thread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+//                e.printStackTrace();
             }
         }
     }
