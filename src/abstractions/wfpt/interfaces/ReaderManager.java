@@ -22,11 +22,16 @@ public interface ReaderManager {
     public void enqueueMessage(String threadName, Message m);
 
     /**
-     * Whatever!
+     * register current thread as the reader with the reader manager for a given name
      * @param readerThreadName
      */
     public void addReader(String readerThreadName);
 
+    /**
+     * returns the Thread associated to a given thread name
+     * @param readerThreadName
+     * @return
+     */
     public Thread getReaderThread(String readerThreadName);
 
 }
