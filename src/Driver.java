@@ -12,9 +12,7 @@ import com.fiji.mvm.Payload;
 import com.fiji.mvm.TimeSliceManager;
 import com.fiji.mvm.VMConfiguration;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class Driver {
     public static void main(String[] args) {
@@ -77,37 +75,50 @@ public class Driver {
     }
 
     private static void testWFPTRecieveMB(final int numberOfRecieves) {
-        final ByteArrayWFPT wfpt = new ByteArrayWFPT();
-        wfpt.setReader(Thread.currentThread());
 
         Thread thread1 = new Thread(new Runnable() {
             public void run() {
-                wfpt.setWriter(Thread.currentThread());
-                wfpt.set("message".getBytes());
-                while (true) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                Queue<ByteArrayWFPT> queue = Driver.getQueue();
+                long start = System.nanoTime();
+                for(int i = 0; i< numberOfRecieves;i++) {
+                    ByteArrayWFPT wfpt = queue.poll();
+                    wfpt.update();
+                    byte[] ba = wfpt.get();
+//                    new String(ba);
                 }
+                System.out.println(numberOfRecieves+" messages update and get in "+(System.nanoTime()-start)+" ns.");
+                System.exit(1);
             }
         });
+        Queue<ByteArrayWFPT> queue = new LinkedList<ByteArrayWFPT>();
+        for(int i =0; i< numberOfRecieves;i++) {
+            ByteArrayWFPT wfpt = new ByteArrayWFPT();
+            wfpt.setWriter(Thread.currentThread());
+            wfpt.setReader(thread1);
+            wfpt.set("message".getBytes());
+            queue.add(wfpt);
+        }
+        setQueue(queue);
         thread1.start();
         try {
-            Thread.sleep(3000);
+            thread1.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        long start = System.nanoTime();
-        for(int i = 0; i< numberOfRecieves; i++) {
-            wfpt.update();
-            wfpt.get();
-        }
-        System.out.println(numberOfRecieves+" messages update and get in "+(System.nanoTime()-start)+" ns.");
-        System.exit(1);
+    }
 
+    private static final Object loc = new Object();
+    private static Queue<ByteArrayWFPT> queue;
+    public static void setQueue(Queue<ByteArrayWFPT> bawfpt) {
+        synchronized (loc) {
+            queue = bawfpt;
+        }
+    }
+    public static Queue<ByteArrayWFPT> getQueue() {
+        synchronized (loc) {
+            return queue;
+        }
     }
 
     private static void testWFPTSendMB(final int numberOfSends) {
