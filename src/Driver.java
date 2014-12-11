@@ -1,3 +1,4 @@
+import abstractions.wfpt.impl.ByteArrayWFPT;
 import abstractions.wfpt.impl.ManagedWFPTCommunication;
 import abstractions.wfpt.impl.Message;
 import abstractions.wfpt.impl.ReaderManagerWithMessageQueue;
@@ -64,11 +65,60 @@ public class Driver {
         testWFPTAbstrationsQunatitiativeRecieve(sleepTimeSec);
     } else if (test.equals("wfptabstractionsCSV")) {
         testWFPTAbstrationsCollection();
+    } else if (test.equals("wfptsendmb")) {
+        testWFPTSendMB(sleepTimeSec);
+    } else if (test.equals("wfptrecievemb")) {
+        testWFPTRecieveMB(sleepTimeSec);
     }
     else {
 	    System.out.println("Unknown test "+test);
 	    System.exit(1);
 	}
+    }
+
+    private static void testWFPTRecieveMB(final int numberOfRecieves) {
+        final ByteArrayWFPT wfpt = new ByteArrayWFPT();
+        wfpt.setReader(Thread.currentThread());
+
+        Thread thread1 = new Thread(new Runnable() {
+            public void run() {
+                wfpt.setWriter(Thread.currentThread());
+                wfpt.set("message".getBytes());
+                while (true) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        thread1.start();
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        long start = System.nanoTime();
+        for(int i = 0; i< numberOfRecieves; i++) {
+            wfpt.update();
+            wfpt.get();
+        }
+        System.out.println(numberOfRecieves+" messages update and get in "+(System.nanoTime()-start)+" ns.");
+        System.exit(1);
+
+    }
+
+    private static void testWFPTSendMB(final int numberOfSends) {
+        ByteArrayWFPT waitFreePairTransaction = new ByteArrayWFPT();
+        waitFreePairTransaction.setWriter(Thread.currentThread());
+        long start = System.nanoTime();
+        for(int i = 0; i< numberOfSends; i++) {
+            waitFreePairTransaction.set("something".getBytes());
+            waitFreePairTransaction.commit();
+        }
+        System.out.println(numberOfSends+" messages set and committed in "+(System.nanoTime()-start)+" ns.");
     }
 
     private static void testWFPTAbstrationsCollection() {
